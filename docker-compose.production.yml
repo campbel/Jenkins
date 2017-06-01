@@ -1,0 +1,18 @@
+version: "3.1"
+
+services:
+  
+  leproxy:
+    image: campbel/letsencryptproxy:latest
+    ports: 
+      - "443:443"
+    command: [-D, jenkins.campbel.io, http://jenkins]
+
+  jenkins:
+    image: campbel/jenkins:latest
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "jenkins:/var/jenkins_home"
+
+volumes:
+  jenkins:
