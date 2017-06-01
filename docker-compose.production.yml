@@ -7,7 +7,7 @@ services:
     ports: 
       - "443:443"
       - "8500:8500"
-    command: ["-D", "jenkins.campbel.io", "http://jenkins"]
+    command: ["-D", "jenkins.campbel.io", "http://jenkins:8080"]
 
   jenkins:
     image: campbel/jenkins:latest
