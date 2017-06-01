@@ -6,6 +6,7 @@ services:
     image: campbel/letsencryptproxy:latest
     ports: 
       - "443:443"
+      - "8500:8500"
     command: ["-D", "jenkins.campbel.io", "http://jenkins"]
 
   jenkins:
