@@ -17,17 +17,17 @@ Let's create a simple application that serves up static text at the root of a we
 package main
 
 import (
-  "fmt"
-  "net/http"
+	"fmt"
+	"net/http"
 )
 
 func main() {
-  http.HandleFunc("/", handler)
-  http.ListenAndServer(":80", nil)
+	http.HandleFunc("/", handler)
+	http.ListenAndServe(":80", nil)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprint(w, "I'm writing an application for my Jenkins pipeline!")
+	fmt.Fprint(w, "I'm writing an application for my Jenkins pipeline!")
 }
 ```
 
@@ -38,10 +38,10 @@ The Dockerfile will tell Docker how to build our image. We start by specifying t
 
 **Dockerfile**
 ```
-FROM golang:1.8.3-alpine3.6     # Use the alpine image.
-ADD main.go /go/src/app/main.go # Add the programs source code.
-RUN go install app              # Build the program from source.
-CMD app                         # Run the app by default.
+FROM golang:1.8.3-alpine3.6
+ADD main.go /go/src/app/main.go
+RUN go install app
+CMD app
 ```
 We can now test the application in Docker by building the container and then running it. 
 1. `docker build -t <dockerhub_username>/myapp .`
@@ -59,12 +59,12 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh docker build -t <dockerhub_username>/myapp .
+                sh "docker build -t <dockerhub_username>/myapp ."
             }
         }
         stage('Push') {
             steps {
-                sh docker push <dockerhub_username>/myapp
+                sh "docker push <dockerhub_username>/myapp"
             }
         }
     }
@@ -91,16 +91,23 @@ Let's add a unit test to our go application. This can be done by adding a file c
 ```
 package main
 
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
 func TestHandler(t *testing.T) {
-  recorder := httptest.NewRecorder()
-  request := httptest.NewRequest("", "/", nil)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest("", "/", nil)
 
-  handler(recorder, request)
+	handler(recorder, request)
 
-  if recorder.StatusCode != http.StatusOK {
-    t.Error("expected status 200 OK")
-  }
+	if recorder.Code != http.StatusOK {
+		t.Error("expected status 200 OK")
+	}
 }
+
 ```
 If you have go installed you can run the tests with `go test`, otherwise go to step 8 and we'll execute them in the container as part of the build.
 
@@ -115,7 +122,7 @@ When we run the container we can pass an optional command to execute. We can use
 .
         stage('Test') {
             steps {
-                sh docker run -it --rm <dockerhub_username>/myapp go test app
+                sh "docker run -it --rm <dockerhub_username>/myapp go test app"
             }
         }
 .
@@ -127,11 +134,12 @@ Alternatively we can add another RUN command to our Dockerfile that will execute
 
 **Dockerfile**
 ```
-.
-.
-.
+FROM golang:1.8.3-alpine3.6
+ADD main.go /go/src/app/main.go
+ADD main_test.go /go/src/app/main_test.go
+RUN go install app
 RUN go test app
-CMD ...
+CMD app
 ```
 If we choose this solution, we won't need to modify our Jenkinsfile.
 
