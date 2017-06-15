@@ -6,8 +6,8 @@ USER root
 RUN apk add --no-cache \
 		ca-certificates
 
-ENV DOCKER_CHANNEL edge
-ENV DOCKER_VERSION 17.05.0-ce
+ENV DOCKER_CHANNEL stable
+ENV DOCKER_VERSION 17.03.1-ce
 
 RUN set -ex; \
 	apk add --no-cache --virtual .fetch-deps \
